@@ -9,7 +9,7 @@ const game = new Game();
 //height = 640px
 //row = 20
 // columns = 10
-const view = new View(root, 320, 640, 20, 10);
+const view = new View(root, 480, 640, 20, 10);
 
 
 window.game = game;

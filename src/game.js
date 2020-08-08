@@ -6,6 +6,7 @@ export default class Game {
     '4': 1200
   }
 
+  level = 0;
   score = 0;
   lines = 0;
 
@@ -48,7 +49,11 @@ export default class Game {
       }
     }
     return {
-      playfield,
+      score: this.score,
+      level: this.level,
+      lines: this.lines,
+      nextPiece: this.nextPiece,
+      playfield
     };
   }
 

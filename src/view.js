@@ -1,4 +1,15 @@
 export default class View {
+  //Раскрасим фигуры
+  static colors = {
+    '1': 'cyan',
+    '2': 'blue',
+    '3': 'orange',
+    '4': 'pink',
+    '5': 'green',
+    '6': 'purple',
+    '7': 'red'
+  }
+
   constructor(element, width, height, rows, columns) {
     this.element = element;
     this.width = width;
@@ -10,25 +21,80 @@ export default class View {
     this.canvas.height = this.height;
     this.context = this.canvas.getContext('2d');
 
-    this.blockWidth = this.width / columns;
-    this.blockHeight = this.height / rows;
+
+    this.playfieldBorderWidth = 4; //Ширина границы 4 пикселя
+    this.playfieldX = this.playfieldBorderWidth;
+    this.playfieldY = this.playfieldBorderWidth;
+    this.playfieldWidth = this.width * 2 / 3; // Ширина игрового поля 2/3 холста
+    this.playfieldHeight = this.height;
+    //Вычислим внутрение размеры игрового поля
+    this.playfieldInnerWidth = this.playfieldWidth - this.playfieldBorderWidth * 2;
+    this.playfieldInnerHeight = this.playfieldHeight - this.playfieldBorderWidth * 2;
+    //Вычислим  размеры фигур внутри игрового поля
+    this.blockWidth = this.playfieldInnerWidth / columns;
+    this.blockHeight = this.playfieldInnerHeight / rows;
+
+    //Определение свойств для боковой панели
+    this.panelX = this.playfieldWidth + 10; // 10 отступ в пикселях
+    this.panelY = 0;
+    this.panelWidth = this.width / 3; // 1/3 ширины холста 
+    this.panelHeight = this.height;
+
 
     this.element.appendChild(this.canvas);
   }
 
 
-  render({
-    playfield
+  renderMainScreen(
+    state
+  ) {
+    this.clearScreen();
+    this.renderPlayfield(state);
+    this.renderPanel(state);
+  }
+
+  //Стартовый экран
+  renderStartScreen() {
+    this.context.fillStyle = 'white';
+    this.context.font = '18px "Press Start 2p"';
+    this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('Press Enter to Start', this.width / 2, this.height / 2);
+  }
+
+  //Экран паузы
+  renderPauseScreen() {
+    this.context.fillStyle = 'rgba(0,0,0,0.75)';
+    this.context.fillRect(0, 0, this.width, this.height);
+
+    this.context.fillStyle = 'white';
+    this.context.font = '18px "Press Start 2p"';
+    this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('Press Enter to Resume', this.width / 2, this.height / 2);
+  }
+
+  //Экран game over
+  renderEndScreen({
+    score
   }) {
     this.clearScreen();
-    this.renderPlayfield(playfield);
+
+    this.context.fillStyle = 'white';
+    this.context.font = '18px "Press Start 2p"';
+    this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
+    this.context.fillText('Game Over', this.width / 2, this.height / 2 - 48);
+    this.context.fillText(`Score: ${score}`, this.width / 2, this.height / 2);
   }
 
   clearScreen() {
     this.context.clearRect(0, 0, this.width, this.height);
   }
 
-  renderPlayfield(playfield) {
+  renderPlayfield({
+    playfield
+  }) {
     for (let y = 0; y < playfield.length; y++) {
       const line = playfield[y];
 
@@ -36,12 +102,60 @@ export default class View {
         const block = line[x];
 
         if (block) {
-          this.renderBlock(x * this.blockWidth, y * this.blockHeight, this.blockWidth, this.blockHeight, 'red');
+          this.renderBlock(
+            this.playfieldX + (x * this.blockWidth),
+            this.playfieldY + (y * this.blockHeight),
+            this.blockWidth,
+            this.blockHeight,
+            View.colors[block]
+          );
         }
       }
     }
+    //Отобразим границу игрового поля
+    this.context.strokeStyle = 'white';
+    this.context.lineWidth = this.playfieldBorderWidth;
+    this.context.strokeRect(0, 0, this.playfieldWidth, this.playfieldHeight);
   }
 
+  //Метод отображения боковой панели. Уровень, очки, удаленные линии, следующая фигура
+  renderPanel({
+    level,
+    score,
+    lines,
+    nextPiece
+  }) {
+    this.context.textAlign = 'start';
+    this.context.textBaseline = 'top';
+    this.context.fillStyle = 'white';
+    this.context.font = '14px "Press Start 2p"';
+
+
+    this.context.fillText(`Score: ${score}`, this.panelX, this.panelY + 0);
+    this.context.fillText(`Lines: ${lines}`, this.panelX, this.panelY + 24); // 0,24,48,96 отступ в пикселях
+    this.context.fillText(`Level: ${level}`, this.panelX, this.panelY + 48);
+    this.context.fillText('Next:', this.panelX, this.panelY + 96);
+
+    //Отображение следующей фигуры
+    for (let y = 0; y < nextPiece.blocks.length; y++) {
+      for (let x = 0; x < nextPiece.blocks[y].length; x++) {
+        const block = nextPiece.blocks[y][x];
+
+        if (block) {
+          this.renderBlock(
+            this.panelX + (x * this.blockWidth * 0.5), // 0.5 для уменьшения фигуры в 2 раза
+            this.panelY + 100 + (y * this.blockHeight * 0.5), //100 отступ по y в пикселях
+            this.blockWidth * 0.5,
+            this.blockHeight * 0.5,
+            View.colors[block]
+          );
+        }
+      }
+
+    }
+  }
+
+  //Метод отображения фигуры 
   renderBlock(x, y, width, height, color) {
     this.context.fillStyle = color;
     this.context.strokeStyle = 'black';

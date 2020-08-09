@@ -6,13 +6,9 @@ export default class Game {
     '4': 1200
   }
 
-  level = 0;
-  score = 0;
-  lines = 0;
-
-  playfield = this.createPlayfield();
-  activePiece = this.createPiece();
-  nextPiece = this.createPiece();
+  constructor() {
+    this.reset();
+  }
 
 
   //Метод увелечения уровня
@@ -53,8 +49,19 @@ export default class Game {
       level: this.level,
       lines: this.lines,
       nextPiece: this.nextPiece,
-      playfield
+      playfield,
+      isGameOver: this.topOut
     };
+  }
+  //обнуление свойств при ReStart
+  reset() {
+    this.score = 0;
+    this.lines = 0;
+    this.topOut = false;
+    this.playfield = this.createPlayfield();
+    this.activePiece = this.createPiece();
+    this.nextPiece = this.createPiece();
+
   }
 
   //Метод создания поля
@@ -160,6 +167,8 @@ export default class Game {
   }
   //Метод движения фигуры вниз
   movePieceDown() {
+    if (this.topOut) return;
+
     this.activePiece.y += 1;
 
     if (this.hasCollision()) {
@@ -168,6 +177,9 @@ export default class Game {
       const clearedLines = this.clearLines();
       this.updateScore(clearedLines);
       this.updatePieces();
+    }
+    if (this.hasCollision()) {
+      this.topOut = true;
     }
   }
 

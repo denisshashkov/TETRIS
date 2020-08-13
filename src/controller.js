@@ -62,6 +62,7 @@ export default class controller {
     }
   }
 
+
   handleKeyDown(event) {
     const state = this.game.getState();
 

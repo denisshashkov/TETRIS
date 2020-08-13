@@ -60,6 +60,10 @@ export default class View {
     this.context.textAlign = 'center';
     this.context.textBaseline = 'middle';
     this.context.fillText('Press Enter to Start', this.width / 2, this.height / 2);
+    this.context.fillText('UP ARROW: Rotate ', this.width / 2, this.panelY + 48);
+    this.context.fillText('LEFT ARROW: Left ', this.width / 2, this.panelY + 96);
+    this.context.fillText('RIGHT ARROW: Right ', this.width / 2, this.panelY + 144);
+    this.context.fillText('DOWN ARROW: Down ', this.width / 2, this.panelY + 192);
   }
 
   //Экран паузы
@@ -137,8 +141,10 @@ export default class View {
     this.context.fillText(`Level: ${level}`, this.panelX, this.panelY + 48);
     this.context.fillText('Next:', this.panelX, this.panelY + 96);
 
+
     //Отображение следующей фигуры
     for (let y = 0; y < nextPiece.blocks.length; y++) {
+
       for (let x = 0; x < nextPiece.blocks[y].length; x++) {
         const block = nextPiece.blocks[y][x];
 
